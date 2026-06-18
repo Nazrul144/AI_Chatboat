@@ -1,5 +1,5 @@
 import ChatbotShell from "@/components/chatbot/ChatbotShell";
-import { getChatbotConfigBySlugStrict } from "@/lib/chatbot-service";
+import { fetchChatbotConfig } from "@/lib/chatbot";
 import { notFound } from "next/navigation";
 
 export default async function EmbedPage({
@@ -8,7 +8,7 @@ export default async function EmbedPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const config = await getChatbotConfigBySlugStrict(slug);
+  const config = await fetchChatbotConfig(slug);
 
   if (!config) notFound();
 
