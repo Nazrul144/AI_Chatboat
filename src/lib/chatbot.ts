@@ -19,6 +19,7 @@ interface BackendAssistantConfig {
   is_active: boolean;
   ui_theme_color: string;
   ui_text_color?: string;
+  ui_banner_color?: string;
   ui_border_radius: string;
 }
 
@@ -38,7 +39,11 @@ function parseBorderRadius(value: string): number {
   return match ? Number(match[1]) : 12;
 }
 
-function buildTheme(primaryColor: string, textColor?: string): ChatbotTheme {
+function buildTheme(
+  primaryColor: string,
+  textColor?: string,
+  bannerColor?: string,
+): ChatbotTheme {
   const normalize = (hex: string) => {
     const v = hex.trim();
     if (/^#[0-9a-fA-F]{6}$/.test(v)) return v;
@@ -63,15 +68,18 @@ function buildTheme(primaryColor: string, textColor?: string): ChatbotTheme {
 
   const primary = normalize(primaryColor);
   const text = textColor ? normalize(textColor) : "#1f2937";
+  const header = bannerColor ? normalize(bannerColor) : adjust(primary, -0.35);
 
   return {
     primary,
     primaryHover: adjust(primary, -0.12),
-    header: adjust(primary, -0.35),
-    headerText: textColor ? text : "#ffffff",
-    headerSubtext: textColor ? text : adjust(primary, 0.45),
+    header,
+    headerText: text,
+    headerSubtext: text,
     text,
-    avatarBg: adjust(primary, 0.15),
+    onPrimary: "#ffffff",
+    assistantBubble: "#f3f4f6",
+    avatarBg: primary,
   };
 }
 
@@ -83,9 +91,24 @@ function mapToChatbotConfig(api: BackendAssistantConfig): ChatbotConfig {
     welcomeMessage: `Hi there! I am the assistant from ${api.business_name}. Ask me about services, pricing, or emergency help.`,
     quickQuestions: ["Roof leak", "Emergency", "Pricing", "Book visit"],
     borderRadius: parseBorderRadius(api.ui_border_radius),
-    theme: buildTheme(api.ui_theme_color, api.ui_text_color),
+    theme: buildTheme(
+      api.ui_theme_color,
+      api.ui_text_color,
+      api.ui_banner_color,
+    ),
     isActive: api.is_active,
   };
+}
+
+async function loadChatbotConfigFromResponse(
+  response: Response,
+): Promise<ChatbotConfig | null> {
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as BackendAssistantConfig;
+  if (!data.is_active) return null;
+
+  return mapToChatbotConfig(data);
 }
 
 /** Server-side: fetch UI config from Django (GET /{slug}/) */
@@ -97,12 +120,22 @@ export async function fetchChatbotConfig(
       headers: { Accept: "application/json" },
       next: { revalidate: 30 },
     });
-    if (!response.ok) return null;
+    return loadChatbotConfigFromResponse(response);
+  } catch {
+    return null;
+  }
+}
 
-    const data = (await response.json()) as BackendAssistantConfig;
-    if (!data.is_active) return null;
-
-    return mapToChatbotConfig(data);
+/** Client-side: refresh UI config via same-origin proxy (no ISR cache) */
+export async function fetchChatbotConfigClient(
+  slug: string,
+): Promise<ChatbotConfig | null> {
+  try {
+    const response = await fetch(`/api/proxy/chatbot/${slug}/`, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    return loadChatbotConfigFromResponse(response);
   } catch {
     return null;
   }

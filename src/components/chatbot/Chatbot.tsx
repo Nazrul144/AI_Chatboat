@@ -102,6 +102,8 @@ export default function Chatbot({
     "--chatbot-header": config.theme.header,
     "--chatbot-header-text": config.theme.headerText,
     "--chatbot-header-subtext": config.theme.headerSubtext,
+    "--chatbot-assistant-bg": config.theme.assistantBubble,
+    "--chatbot-on-primary": config.theme.onPrimary,
     "--chatbot-text": config.theme.text,
     "--chatbot-radius": `${radius}px`,
     "--chatbot-radius-sm": `${Math.max(0, radius - 4)}px`,
@@ -201,7 +203,7 @@ export default function Chatbot({
               </p>
               <p
                 className="text-xs"
-                style={{ color: "var(--chatbot-header-subtext)" }}
+                style={{ color: "var(--chatbot-header-subtext)", opacity: 0.7 }}
               >
                 Online · Typically replies instantly
               </p>
@@ -226,8 +228,9 @@ export default function Chatbot({
 
           <div className="flex max-h-96 flex-col gap-3 overflow-y-auto px-4 py-4">
             <div
-              className="max-w-[90%] bg-gray-100 px-3.5 py-2.5 text-sm leading-relaxed"
+              className="max-w-[90%] px-3.5 py-2.5 text-sm leading-relaxed"
               style={{
+                backgroundColor: "var(--chatbot-assistant-bg)",
                 color: "var(--chatbot-text)",
                 borderRadius: "var(--chatbot-radius-sm)",
                 borderTopLeftRadius: "4px",
@@ -240,12 +243,17 @@ export default function Chatbot({
               <div
                 key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`}
                 className={`max-w-[85%] px-3.5 py-2.5 text-sm ${
-                  msg.role === "user" ? "ml-auto text-white" : "bg-gray-100"
+                  msg.role === "user" ? "ml-auto" : ""
                 }`}
                 style={{
-                  color: msg.role === "user" ? "#ffffff" : "var(--chatbot-text)",
+                  color:
+                    msg.role === "user"
+                      ? "var(--chatbot-on-primary)"
+                      : "var(--chatbot-text)",
                   backgroundColor:
-                    msg.role === "user" ? "var(--chatbot-primary)" : undefined,
+                    msg.role === "user"
+                      ? "var(--chatbot-primary)"
+                      : "var(--chatbot-assistant-bg)",
                   borderRadius: "var(--chatbot-radius-sm)",
                   borderTopRightRadius: msg.role === "user" ? "4px" : undefined,
                   borderTopLeftRadius:
@@ -307,6 +315,7 @@ export default function Chatbot({
               className="flex h-10 w-10 shrink-0 items-center justify-center text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               style={{
                 backgroundColor: "var(--chatbot-primary)",
+                color: "var(--chatbot-on-primary)",
                 borderRadius: radius === 0 ? "0" : "9999px",
               }}
               aria-label="Send message"
@@ -317,19 +326,30 @@ export default function Chatbot({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={toggleChatbot}
-        className="flex h-16 w-16 items-center justify-center text-white shadow-lg transition-transform hover:scale-105 hover:opacity-90"
-        style={{
-          backgroundColor: "var(--chatbot-primary)",
-          borderRadius: radius === 0 ? "0" : "9999px",
-        }}
-        aria-label={isOpen ? "Close chatbot" : "Open chatbot"}
-        aria-expanded={isOpen}
-      >
-        <ChatBubbleIcon />
-      </button>
+      <div className="group relative">
+        <span className="pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-lg bg-[#1a2b4b] px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+          Active Now
+        </span>
+
+        <button
+          type="button"
+          onClick={toggleChatbot}
+          className="relative flex h-16 w-16 items-center justify-center text-white shadow-lg transition-transform hover:scale-105 hover:opacity-90"
+          style={{
+            backgroundColor: "var(--chatbot-primary)",
+            color: "var(--chatbot-on-primary)",
+            borderRadius: radius === 0 ? "0" : "9999px",
+          }}
+          aria-label={isOpen ? "Close chatbot" : "Open chatbot"}
+          aria-expanded={isOpen}
+        >
+          <span
+            className="absolute -bottom-1 -left-1 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white"
+            aria-hidden="true"
+          />
+          <ChatBubbleIcon />
+        </button>
+      </div>
     </div>
   );
 }

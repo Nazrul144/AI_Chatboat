@@ -1,11 +1,7 @@
-import React from 'react'
-
-const Footer = () => {
+export default function Footer() {
   return (
-    <div>
-      <h1>This is the Footer</h1>
-    </div>
-  )
+    <footer className="border-t border-white/[0.06] px-4 py-8 text-center text-sm text-slate-500">
+      © {new Date().getFullYear()} NexFlow AI. All rights reserved.
+    </footer>
+  );
 }
-
-export default Footer

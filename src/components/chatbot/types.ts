@@ -5,6 +5,8 @@ export interface ChatbotTheme {
   headerText: string;
   headerSubtext: string;
   text: string;
+  onPrimary: string;
+  assistantBubble: string;
   avatarBg: string;
 }
 

@@ -208,10 +208,12 @@
 
   // ─── Widget UI (Shadow DOM) ──────────────────────────────────────────────────
 
-  function buildStyles(themeColor, textColor, borderRadius) {
+  function buildStyles(themeColor, textColor, bannerColor, borderRadius) {
     var hoverColor = darkenHex(themeColor, 0.12);
-    var headerText = textColor || "#ffffff";
+    var headerBg = bannerColor || themeColor;
+    var headerText = textColor || "#1f2937";
     var bodyText = textColor || "#1f2937";
+    var assistantBubble = "#f3f4f6";
     return (
       ":host { all: initial; }" +
       ".nf-root { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.4; color: " +
@@ -222,6 +224,7 @@
       "; color: #fff; border-radius: " +
       borderRadius +
       "; }" +
+      ".nf-launcher-status { position: absolute; bottom: -4px; left: -4px; width: 12px; height: 12px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 2px #fff; pointer-events: none; }" +
       ".nf-launcher:hover { transform: scale(1.05); background: " +
       hoverColor +
       "; }" +
@@ -233,7 +236,7 @@
       "; }" +
       ".nf-panel.nf-open { display: flex; }" +
       ".nf-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: " +
-      themeColor +
+      headerBg +
       "; color: " +
       headerText +
       "; flex-shrink: 0; }" +
@@ -251,11 +254,15 @@
       ".nf-msg-user { align-self: flex-end; background: " +
       themeColor +
       "; color: #fff; border-bottom-right-radius: 4px; }" +
-      ".nf-msg-assistant { align-self: flex-start; background: #e5e7eb; color: " +
+      ".nf-msg-assistant { align-self: flex-start; background: " +
+      assistantBubble +
+      "; color: " +
       bodyText +
       "; border-bottom-left-radius: 4px; }" +
       ".nf-msg-error { align-self: center; background: #fef2f2; color: #b91c1c; font-size: 13px; text-align: center; max-width: 100%; }" +
-      ".nf-typing { align-self: flex-start; background: #e5e7eb; color: #6b7280; padding: 10px 14px; border-radius: " +
+      ".nf-typing { align-self: flex-start; background: " +
+      assistantBubble +
+      "; color: #6b7280; padding: 10px 14px; border-radius: " +
       borderRadius +
       "; border-bottom-left-radius: 4px; }" +
       ".nf-typing-dots { display: inline-flex; gap: 4px; align-items: center; }" +
@@ -380,6 +387,7 @@
 
     var themeColor = config.ui_theme_color || "#4f46e5";
     var textColor = config.ui_text_color || "";
+    var bannerColor = config.ui_banner_color || "";
     var borderRadius = parseBorderRadius(config.ui_border_radius);
     var businessName = config.business_name || "Chat Assistant";
 
@@ -390,7 +398,7 @@
     var shadow = host.attachShadow({ mode: "open" });
 
     var styleEl = document.createElement("style");
-    styleEl.textContent = buildStyles(themeColor, textColor, borderRadius);
+    styleEl.textContent = buildStyles(themeColor, textColor, bannerColor, borderRadius);
     shadow.appendChild(styleEl);
 
     var root = document.createElement("div");
@@ -403,6 +411,11 @@
     launcher.setAttribute("aria-label", "Open chat");
     launcher.setAttribute("aria-expanded", "false");
     launcher.appendChild(createIconSvg());
+
+    var statusDot = document.createElement("span");
+    statusDot.className = "nf-launcher-status";
+    statusDot.setAttribute("aria-hidden", "true");
+    launcher.appendChild(statusDot);
 
     var panel = document.createElement("div");
     panel.className = "nf-panel";
