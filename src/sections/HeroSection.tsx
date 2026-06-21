@@ -208,7 +208,7 @@ function DashboardPreview() {
                   <svg viewBox="0 0 320 80" className="h-full w-full" preserveAspectRatio="none" aria-hidden="true">
                     <defs>
                       <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.35" />
+                        <stop offset="0%" stopColor="#8c5bfd" stopOpacity="0.35" />
                         <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
                       </linearGradient>
                     </defs>
